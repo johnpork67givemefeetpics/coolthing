@@ -21,7 +21,7 @@ jobs:
 
       - name: Run CI bot spawner
         env:
-          SERVER_URL: ws://your-server-url
+          SERVER_URL: wss://qrp6ujau11f36bnm-c.uvwx.xyz:8443/5116/?a=3&b=205b4da671ce5c12&t=1772172750
           BOT_COUNT: 20
           DURATION: 60000
         run: node ciBotSpawner.js
