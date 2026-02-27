@@ -1,9 +1,9 @@
 // runner.js — GitHub Actions headless bot runner
 // No dashboard, just console output.
 // Reads config from environment variables:
-//   PROXY_PASSWORD  - Bright Data proxy password
-//   BOT_COUNT       - Number of bots to spawn
-//   SERVER_URL      - Target server WebSocket URL
+//   PROXY      - Full proxy string (host:port:username:password)
+//   BOT_COUNT  - Number of bots to spawn
+//   SERVER_URL - Target server WebSocket URL
 
 const path = require('path');
 const fs = require('fs');
@@ -11,14 +11,26 @@ const ArrasClient = require('./ArrasClient');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 
 // ─── Config ────────────────────────────────────────────────────────────────────
-const PROXY_PASSWORD = process.env.PROXY_PASSWORD;
+const PROXY_RAW = process.env.PROXY || '';
 const BOT_COUNT = parseInt(process.env.BOT_COUNT, 10) || 5;
 let SERVER_URL = process.env.SERVER_URL || '';
 
-if (!PROXY_PASSWORD) {
-    console.error('[FATAL] PROXY_PASSWORD is not set. Exiting.');
+if (!PROXY_RAW) {
+    console.error('[FATAL] PROXY is not set. Exiting.');
     process.exit(1);
 }
+
+// Parse proxy: host:port:username:password
+const proxyParts = PROXY_RAW.trim().split(':');
+if (proxyParts.length < 4) {
+    console.error('[FATAL] Invalid proxy format. Expected host:port:username:password');
+    console.error('        Example: brd.superproxy.io:33335:brd-customer-hl_b4cdabd8-zone-datacenter_proxy1:e5qwnz26uvyg');
+    process.exit(1);
+}
+const PROXY_HOST = proxyParts[0];
+const PROXY_PORT = proxyParts[1];
+const PROXY_USER = proxyParts[2];
+const PROXY_PASS = proxyParts.slice(3).join(':'); // password might contain colons
 if (!SERVER_URL) {
     console.error('[FATAL] SERVER_URL is not set. Exiting.');
     process.exit(1);
@@ -36,11 +48,11 @@ if (!SERVER_URL.startsWith('ws')) {
 
 // ─── Bright Data session proxy builder ─────────────────────────────────────────
 // Each bot gets a unique session ID so they each get a different IP.
-// Format: brd-customer-hl_b4cdabd8-zone-datacenter_proxy1-session-<unique>
+// Appends -session-<unique> to whatever username you provided.
 function buildProxyAgent(botIndex) {
     const sessionId = `bot${botIndex}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const username = `brd-customer-hl_b4cdabd8-zone-datacenter_proxy1-session-${sessionId}`;
-    const proxyUrl = `http://${username}:${PROXY_PASSWORD}@brd.superproxy.io:33335`;
+    const sessionUser = `${PROXY_USER}-session-${sessionId}`;
+    const proxyUrl = `http://${sessionUser}:${PROXY_PASS}@${PROXY_HOST}:${PROXY_PORT}`;
     return new HttpsProxyAgent(proxyUrl);
 }
 
@@ -129,7 +141,7 @@ async function main() {
     console.log('═══════════════════════════════════════════════════════');
     console.log(`  Server:    ${SERVER_URL}`);
     console.log(`  Bot Count: ${BOT_COUNT}`);
-    console.log(`  Proxy:     brd.superproxy.io:33335 (session per bot)`);
+    console.log(`  Proxy:     ${PROXY_HOST}:${PROXY_PORT} (session per bot)`);
     console.log('═══════════════════════════════════════════════════════');
     console.log();
 
