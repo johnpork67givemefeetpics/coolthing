@@ -2,6 +2,21 @@ name: CI Bot Test
 
 on:
   workflow_dispatch:
+    inputs:
+      server_url:
+        description: "WebSocket server URL (e.g. ws://example.com)"
+        required: true
+        type: string
+      bot_count:
+        description: "Number of bots to spawn"
+        required: true
+        default: "20"
+        type: string
+      duration:
+        description: "Duration in milliseconds"
+        required: true
+        default: "60000"
+        type: string
 
 jobs:
   loadtest:
@@ -21,7 +36,7 @@ jobs:
 
       - name: Run CI bot spawner
         env:
-          SERVER_URL: wss://qrp6ujau11f36bnm-c.uvwx.xyz:8443/5116/?a=3&b=205b4da671ce5c12&t=1772172750
-          BOT_COUNT: 20
-          DURATION: 60000
+          SERVER_URL: ${{ inputs.server_url }}
+          BOT_COUNT: ${{ inputs.bot_count }}
+          DURATION: ${{ inputs.duration }}
         run: node ciBotSpawner.js
