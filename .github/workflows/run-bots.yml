@@ -20,7 +20,7 @@ on:
 jobs:
   run-bots:
     runs-on: ubuntu-latest
-    timeout-minutes: 360  # 6 hour max
+    timeout-minutes: 360
 
     steps:
       - name: Checkout repository
@@ -32,11 +32,9 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        working-directory: ./bot
         run: npm install ws https-proxy-agent socks-proxy-agent
 
       - name: Run bots
-        working-directory: ./bot
         env:
           PROXY: ${{ inputs.proxy }}
           BOT_COUNT: ${{ inputs.bot_count }}
