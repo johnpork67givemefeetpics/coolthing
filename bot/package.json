@@ -1,0 +1,14 @@
+{
+  "name": "arras-bot-runner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Arras.io bot runner for GitHub Actions",
+  "scripts": {
+    "start": "node runner.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0",
+    "https-proxy-agent": "^7.0.4",
+    "socks-proxy-agent": "^8.0.2"
+  }
+}
