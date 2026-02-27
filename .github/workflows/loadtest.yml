@@ -1,0 +1,27 @@
+name: CI Bot Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  loadtest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run CI bot spawner
+        env:
+          SERVER_URL: ws://your-server-url
+          BOT_COUNT: 20
+          DURATION: 60000
+        run: node ciBotSpawner.js
