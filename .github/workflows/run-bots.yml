@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       proxy:
-        description: 'Bright Data proxy password (from Access Parameters)'
+        description: 'Full proxy (host:port:username:password)'
         required: true
         type: string
       bot_count:
@@ -20,7 +20,7 @@ on:
 jobs:
   run-bots:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 360  # 6 hour max
 
     steps:
       - name: Checkout repository
@@ -38,7 +38,7 @@ jobs:
       - name: Run bots
         working-directory: ./bot
         env:
-          PROXY_PASSWORD: ${{ inputs.proxy }}
+          PROXY: ${{ inputs.proxy }}
           BOT_COUNT: ${{ inputs.bot_count }}
           SERVER_URL: ${{ inputs.server_url }}
         run: node runner.js
